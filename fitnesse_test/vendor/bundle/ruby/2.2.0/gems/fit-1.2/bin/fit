@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+
+require 'fit/file_runner'
+require 'fit/parse'
+require 'fit/version'
+
+require 'optparse'
+
+options = {}
+
+option_parser = OptionParser.new
+option_parser.on("-v", "--version") do
+  puts Fit::VERSION_BLURB
+  exit 0
+end
+option_parser.on("-h", "--help") do
+  puts Fit::HELP_BLURB
+  exit 0
+end
+option_parser.on("-eENC", "--encoding=ENC", String) do |enc|
+  options[:encoding] = enc
+end
+
+begin
+  args = option_parser.parse(ARGV)
+rescue OptionParser::InvalidOption => invalid
+  puts "#{File.basename($0)}: #{invalid.message}"
+  exit -1
+end
+
+report = args[1]
+unless report.nil?
+  Fit::Parse.footnote_path = File.dirname(report) + File::SEPARATOR
+end
+Fit::FileRunner.new.run(args, options.empty? ? nil : options)
